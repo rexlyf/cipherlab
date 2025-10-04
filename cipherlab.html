@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CipherLab - FHE Simulator</title>
+<style>
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #0d1117;
+    color: #c9d1d9;
+  }
+  h1, h2 { margin: 0; }
+  .container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 20px;
+  }
+  button {
+    background-color: #238636;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    margin: 10px 5px 0 0;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: 0.3s;
+  }
+  button:hover { background-color: #2ea043; }
+  input {
+    padding: 8px 10px;
+    margin: 10px 10px 10px 0;
+    border-radius: 6px;
+    border: none;
+    width: 100px;
+    text-align: center;
+    font-size: 16px;
+  }
+  .card {
+    background-color: #161b22;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: 0.5s;
+  }
+  .card.visible { opacity: 1; transform: translateY(0); }
+  .footer { text-align: center; margin: 40px 0 20px 0; font-size: 14px; color: #8b949e; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>CipherLab</h1>
+  <p>Interactive Fully Homomorphic Encryption (FHE) Simulator</p>
+
+  <div class="card visible" id="inputCard">
+    <h2>Step 1: Input Numbers</h2>
+    <input type="number" id="num1" value="0">
+    <input type="number" id="num2" value="0">
+    <br>
+    <button onclick="encryptNumbers()">Encrypt</button>
+  </div>
+
+  <div class="card" id="encryptCard">
+    <h2>Step 2: Encrypted Numbers</h2>
+    <p>Encrypted Num1: <span id="cipher1"></span></p>
+    <p>Encrypted Num2: <span id="cipher2"></span></p>
+    <button onclick="compute('add')">Add</button>
+    <button onclick="compute('multiply')">Multiply</button>
+  </div>
+
+  <div class="card" id="resultCard">
+    <h2>Step 3: Computation Result</h2>
+    <p>Encrypted Result: <span id="resultCipher"></span></p>
+    <p>Decrypted Result: <span id="result"></span></p>
+  </div>
+
+  <div class="card visible">
+    <h2>How It Works</h2>
+    <p>
+      CipherLab simulates Fully Homomorphic Encryption (FHE). Enter numbers,
+      encrypt them, and perform computations on encrypted data. The result
+      can be decrypted to show correctness, demonstrating how computations
+      can occur without revealing raw data.
+    </p>
+  </div>
+
+  <div class="footer">Built by Masoom</div>
+</div>
+
+<script>
+  let cipher1 = '', cipher2 = '', resultCipher = '', result = null;
+
+  function encrypt(num) {
+    return btoa(num + Math.floor(Math.random() * 1000));
+  }
+
+  function decrypt(cipher) {
+    try {
+      const decoded = atob(cipher);
+      return parseInt(decoded.match(/\d+/)[0]);
+    } catch {
+      return 0;
+    }
+  }
+
+  function encryptNumbers() {
+    const num1 = parseInt(document.getElementById('num1').value) || 0;
+    const num2 = parseInt(document.getElementById('num2').value) || 0;
+    cipher1 = encrypt(num1);
+    cipher2 = encrypt(num2);
+    result = null;
+    resultCipher = '';
+    document.getElementById('cipher1').textContent = cipher1;
+    document.getElementById('cipher2').textContent = cipher2;
+    document.getElementById('result').textContent = '';
+    document.getElementById('resultCipher').textContent = '';
+    showCard('encryptCard');
+    hideCard('resultCard');
+  }
+
+  function compute(op) {
+    const n1 = decrypt(cipher1);
+    const n2 = decrypt(cipher2);
+    let res = 0;
+    if(op === 'add') res = n1 + n2;
+    if(op === 'multiply') res = n1 * n2;
+    resultCipher = encrypt(res);
+    result = res;
+    document.getElementById('resultCipher').textContent = resultCipher;
+    document.getElementById('result').textContent = '';
+    showCard('resultCard');
+
+    // Animate decryption
+    setTimeout(() => {
+      document.getElementById('result').textContent = result;
+    }, 800);
+  }
+
+  function showCard(id) {
+    const card = document.getElementById(id);
+    card.classList.add('visible');
+  }
+
+  function hideCard(id) {
+    const card = document.getElementById(id);
+    card.classList.remove('visible');
+  }
+</script>
+</body>
+</html>
